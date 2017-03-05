@@ -1,0 +1,154 @@
+@charset "utf-8";
+h1, h2 {
+	margin-top: 0;
+	padding-top: 0;
+}
+div.koriotto_progress {
+	width: 100%;
+	min-height: 40px;
+	background: #ddd;
+	position: relative;
+}
+
+.koriotto_progress_fill {
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	overflow: hidden;
+	height: 100%;
+	border: none;
+}
+.koriotto_musicbar {
+	height: 100%;
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	overflow: hidden;
+}
+.koriotto_section:nth-child(odd) {
+	background: #EFAFFD;
+}
+.koriotto_section:nth-child(even) {
+	background: #B480B1;
+}
+.koriotto_progress_fill {
+	background: #802D9B;
+}
+#edit-koriotto-section-props div.fieldset-wrapper {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: top;
+}
+#edit-koriotto-section-props div.fieldset-wrapper div {
+	flex: 0 0 auto;
+	margin-right: 20px;
+}
+#edit-koriotto-section-props div.fieldset-wrapper div:last-of-type {
+	margin: 0;
+}
+#song_progress_fill {
+	z-index: 1;
+}
+#song_playhead {
+	z-index: 5;
+	background: none;
+	border-right: solid 10px #000;
+	pointer-events: none;
+	display: flex;
+}
+#sections_fill {
+	z-index: 2;
+	background: none;
+	right: 0;
+}
+#section_data {
+	display: none;
+}
+#bpm_measure {
+	background: #0F02B4;
+	color: #fff;
+	font-family: "Gill Sans", "Gill Sans MT", "Myriad Pro", "DejaVu Sans Condensed", Helvetica, Arial, sans-serif;
+	font-size: x-small;
+	text-transform: uppercase;
+	padding: 2px 10px;
+	cursor: pointer;
+}
+.koriotto_beatMark {
+	border-right: 1px dashed #fff;
+	background: none;
+}
+#menu {
+	flex: 0 0 auto;
+	background: #fff;
+	display: flex;
+	flex-direction: row;
+	padding: 2px;
+	order: 1;
+}
+#counter {
+	right: 0;
+	vertical-align: middle;
+	text-align: center;
+	z-index: 4;
+	background: none;
+	pointer-events: none;
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+}
+.koriotto_highlight {
+	background: rgba(255,255,0,0.5);
+	color: #000;
+}
+#ui {
+	flex: 1 0;
+	padding: 30px;
+	order: 2;
+}
+#counter > div {
+	flex: 1 0 auto;
+	color: #fff;
+	font-family: "Gill Sans", "Gill Sans MT", "Myriad Pro", "DejaVu Sans Condensed", Helvetica, Arial, sans-serif;
+	font-size: 20px;
+}
+#menu textarea {
+	flex: 1 0 auto;
+}
+#menu input {
+	padding-bottom: 10px;
+}
+#menu button {
+	font-size: 12px;
+	text-transform: uppercase;
+	padding: 1px 6px;
+	margin: 0px 14px;
+}
+#spacer {
+	flex: 1 0;
+}
+#section_choreography {
+	overflow-y: auto;
+	max-height: 300px;
+	border-collapse: collapse;
+	width: 100%;
+}
+#section_choreography td {
+	border: solid 1px #ccc;
+	padding: 6px;
+}
+input.koriotto_choreoEdit {
+	width: 100%;
+}
+#section_choreography .koriotto_action {
+	margin: 3px;
+	font-size: large;
+	color: #ff0;
+}
+
+#sections_fill div.koriotto_action {
+	background: #0F02B4;
+	color: #000;
+	}

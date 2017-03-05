@@ -1,0 +1,205 @@
+<?php
+function koriotto_help($path, $arg) {
+	switch ($path) {
+	case "admin/help#koriotto":
+		return '<p>' . t("Create, edit and play back puppet choreography") . '</p>';
+	break;
+	}
+}
+	
+function koriotto_theme($existing, $type, $theme, $path) {
+	return array();
+}
+
+function koriotto_theme_registry_alter(&$theme_registry) {
+    // Defined path to the current module.
+    $module_path = drupal_get_path('module', 'koriotto');
+    // Find all .tpl.php files in this module's folder recursively.
+    $template_file_objects = drupal_find_theme_templates($theme_registry, '.tpl.php', $module_path);
+    // Iterate through all found template file objects.
+    foreach ($template_file_objects as $key => $template_file_object) {
+        // If the template has not already been overridden by a theme.
+        if (!isset($theme_registry[$key]['theme path']) || !preg_match('#/themes/#', $theme_registry[$key]['theme path'])) {
+            // Alter the theme path and template elements.
+            $theme_registry[$key]['theme path'] = $module_path;
+            $theme_registry[$key] = array_merge($theme_registry[$key], $template_file_object);
+            $theme_registry[$key]['type'] = 'module';
+        }
+    }
+}
+
+function koriotto_node_view_alter(&$build) {
+	if ($build['#node']->type == 'song') {
+		drupal_add_js(drupal_get_path('module', 'koriotto') . '/koriotto.js', 'file');
+		drupal_add_css(drupal_get_path('module', 'koriotto') . '/koriotto.css', 'file');
+    drupal_add_js(
+		array(
+			'koriotto' => array(
+				'section_data' => json_encode($build['#node']->field_section),
+			),
+		),
+		'setting');
+
+	}
+}
+
+function koriotto_form_song_node_form_alter(&$form, &$form_state, $form_id) {
+	drupal_add_js(drupal_get_path('module', 'koriotto') . '/koriotto.js', 'file');
+	drupal_add_js(
+		array(
+			'koriotto' => array(
+				'section_data' => json_encode($form_state['node']->field_section),
+			),
+		),
+		'setting'
+	);
+	drupal_add_css(drupal_get_path('module', 'koriotto') . '/koriotto.css', 'file');
+	$playbar_code = <<<PLAYBAR
+<div id="song_progress" class="koriotto_progress">
+<div id="song_progress_fill" class="koriotto_progress_fill"></div>
+<div id="song_playhead" class="koriotto_progress_fill"></div>
+<div id="sections_fill" class="koriotto_progress_fill"></div>
+<div id="counter" class="koriotto_progress_fill">
+<div id="elapsed">&nbsp;</div>
+<div>/</div>
+<div id="total">&nbsp;</div>
+</div>
+</div>
+PLAYBAR;
+	$section_playbar_code = <<<PLAYBAR
+<div id="section_progress" class="koriotto_progress">
+<div id="section_progress_fill" class="koriotto_progress_fill"></div>
+<div id="section_measures" class="koriotto_measures"></div>
+PLAYBAR;
+	$form['koriotto'] = array(
+		'#type' => 'container',
+		'#tree' => TRUE,
+	);
+	$form['koriotto']['song'] = array(
+		'#type' => 'markup',
+		'#markup' =>  '<audio id="song" src="' . file_create_url($form_state['node']->field_trackfile[LANGUAGE_NONE][0]['uri']) . '"></audio>',
+	);
+	$form['koriotto']['playbar'] = array(
+		'#type' => 'container',
+		'#children' => $playbar_code,
+		'#weight' => 0,
+	);
+	$form['koriotto']['section_playbar'] = array(
+		'#type' => 'container',
+		'#children' => $section_playbar_code,
+		'#weight' => 1,
+	);
+	$form['koriotto']['controls'] = array(
+		'#type' => 'container',
+		'#tree' => TRUE,
+		'#weight' => 2,
+	);
+	$form['koriotto']['controls']['play_btn'] = array(
+		'#type' => 'button',
+		'#value' => 'Play',
+		'#attributes' => array('onclick' => 'return (false);'),
+		'#weight' => 0,
+	);
+	$form['koriotto']['controls']['pause_btn'] = array(
+		'#type' => 'button',
+		'#value' => 'Pause',
+		'#attributes' => array('onclick' => 'return (false);'),
+		'#weight' => 1,
+	);
+	$form['koriotto']['controls']['rewind_btn'] = array(
+		'#type' => 'button',
+		'#value' => 'Rewind',
+		'#attributes' => array('onclick' => 'return (false);'),
+		'#weight' => 2,
+	);
+	$form['koriotto']['controls']['section_btn'] = array(
+		'#type' => 'button',
+		'#value' => 'Section',
+		'#attributes' => array('onclick' => 'return (false);'),
+		'#weight' => 3,
+	);
+	$form['koriotto']['section_props'] = array(
+		'#type' => 'fieldset',
+		'#tree' => TRUE,
+		'#title' => 'Section tempo',
+		'#weight' => 3,
+	);
+	$form['koriotto']['section_props']['bpm'] = array(
+		'#type' => 'textfield',
+		'#title' => 'BPM',
+		'#size' => 8,
+		'#weight' => 0,
+	);
+	$form['koriotto']['section_props']['timesig'] = array(
+		'#type' => 'textfield',
+		'#title' => 'Beats per measure',
+		'#size' => 8,
+		'#weight' => 1,
+	);
+	$form['koriotto']['section_props']['start'] = array(
+		'#type' => 'textfield',
+		'#title' => 'Start',
+		'#size' => 14,
+		'#weight' => 2,
+	);
+	$form['koriotto']['section_props']['finish'] = array(
+		'#type' => 'textfield',
+		'#title' => 'Finish',
+		'#size' => 14,
+		'#weight' => 3,
+	);
+	$form['koriotto']['section_props']['delete_btn'] = array(
+		'#type' => 'button',
+		'#value' => 'Remove',
+		'#attributes' => array('onclick' => 'return (false);'),
+		'#weight' => 4,
+	);
+	$form['koriotto']['section_props']['apply_btn'] = array(
+		'#type' => 'button',
+		'#value' => 'Apply',
+		'#attributes' => array('onclick' => 'return (false);'),
+		'#weight' => 5,
+	);
+	$form['koriotto']['section_choreography'] = array(
+		'#type' => 'fieldset',
+		'#tree' => TRUE,
+		'#title' => 'Section choreography',
+		'#weight' => 4,
+	);
+}
+
+function _koriotto_choreography_table($section_data) {
+	$header = isset($section_data->parts) ? $section_data[0]->parts : array('');
+	$data = array();
+	
+	if (isset($section->choreography)) {
+		$data = $section->choreography;
+	}
+	return theme_table(array(
+		'header' => $header,
+		'rows' => $data,
+		'attributes' => array(),
+		'empty' => "No choreography yet",
+		'caption' => "Section choreography",
+		'colgroups' => array(),
+		'sticky' => TRUE,
+	));
+}
+
+function koriotto_preprocess_page(&$vars) {
+	if (isset($vars['node']->type) && $vars['node']->type == 'song') {
+	// remove sidebars for song pages.
+		$vars['page']['sidebar_first'] = FALSE;
+		$vars['page']['sidebar_second'] = FALSE;
+	} 
+	
+}
+function koriotto_preprocess_html(&$vars) {
+	if (in_array('node-type-song', $vars['classes_array'])) {
+		$index = array_search('two-sidebars', $vars['classes_array']);
+		if ($index !== FALSE) {
+			unset($vars['classes_array'][$index]);
+		}
+		$vars['classes_array'][] = 'no-sidebars';
+	}
+}
